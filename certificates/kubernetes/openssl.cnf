@@ -1,0 +1,239 @@
+# OpenSSL k8s CA configuration file.
+[ ca ]
+default_ca = CA_default
+
+[ CA_default ]
+dir               = /root/k8s-the-hard-way/certificates/kubernetes
+certs             = $dir/certs
+crl_dir           = $dir/crl
+new_certs_dir     = $dir/newcerts
+database          = $dir/index.txt
+serial            = $dir/serial
+RANDFILE          = $dir/private/.rand
+
+# The root key and root certificate.
+private_key       = $dir/ca.key
+certificate       = $dir/ca.crt
+
+# SHA-1 is deprecated, so use SHA-2 instead.
+default_md        = sha256
+
+name_opt          = ca_default
+cert_opt          = ca_default
+default_days      = 375
+preserve          = no
+policy            = policy_loose
+
+[ policy_loose ]
+countryName             = optional
+stateOrProvinceName     = optional
+localityName            = optional
+organizationName        = optional
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+[ req ]
+default_bits        = 2048
+distinguished_name  = req_distinguished_name
+string_mask         = utf8only
+prompt             = no
+
+default_md          = sha256
+
+x509_extensions     = v3_intermediate_ca
+
+[ req_distinguished_name ]
+countryName             = DE
+stateOrProvinceName     = Berlin
+localityName             = Berlin
+0.organizationName       = kubernetes
+commonName              = kubernetes-ca
+
+[ v3_intermediate_ca ]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true, pathlen:0
+keyUsage = critical, digitalSignature, cRLSign, keyCertSign
+
+##################### kube-apiserver	 #####################
+# Important -> Add the very first IP of the cluster range to the cert - it is used as k8s service!
+[ kube-apiserver ]
+distinguished_name = kube-apiserver_distinguished_name
+req_extensions = kube-apiserver_extensions
+prompt = no
+
+[ kube-apiserver_extensions ]
+basicConstraints = CA:FALSE
+extendedKeyUsage = serverAuth
+keyUsage = critical, digitalSignature, keyEncipherment
+nsCertType = server
+nsComment = kube-apiserver Certificate
+subjectAltName = DNS:localhost, IP:127.0.0.1, DNS:control-plane-0, IP:13.94.187.159, IP: 10.96.0.1, IP:10.0.0.4, DNS:kubernetes, DNS:kubernetes.default, DNS:kubernetes.default.svc, DNS:kubernetes.default.svc.cluster, DNS:kubernetes.default.svc.cluster.local
+subjectKeyIdentifier = hash
+
+[kube-apiserver_distinguished_name]
+countryName = DE
+stateOrProvinceName = Berlin
+localityName = Berlin
+0.organizationName = kubernetes
+commonName = kube-apiserver
+
+##################### kube-apiserver-kubelet-client	 #####################
+
+[ kube-apiserver-kubelet-client ]
+distinguished_name = kube-apiserver-kubelet-client_distinguished_name
+req_extensions = kube-apiserver-kubelet-client_extensions
+prompt = no
+
+[ kube-apiserver-kubelet-client_extensions ]
+basicConstraints = CA:FALSE
+extendedKeyUsage = clientAuth
+keyUsage = critical, digitalSignature, keyEncipherment
+nsCertType = client
+nsComment = kube-apiserver-kubelet-client Certificate
+subjectKeyIdentifier = hash
+
+[kube-apiserver-kubelet-client_distinguished_name]
+countryName = DE
+stateOrProvinceName = Berlin
+localityName = Berlin
+0.organizationName = system:masters
+commonName = kube-apiserver-kubelet-client
+
+##################### service accounts #####################
+
+[ service-accounts ]
+distinguished_name = service-accounts_distinguished_name
+req_extensions = service-accounts_extensions
+prompt = no
+
+[ service-accounts_extensions ]
+basicConstraints = CA:FALSE
+extendedKeyUsage = clientAuth
+keyUsage = critical, digitalSignature, keyEncipherment
+nsCertType = client
+nsComment = service-accounts Certificate
+subjectKeyIdentifier = hash
+
+[service-accounts_distinguished_name]
+countryName = DE
+stateOrProvinceName = Berlin
+localityName = Berlin
+0.organizationName = system:masters
+commonName = service-accounts
+
+##################### admin	 #####################
+
+[ admin ]
+distinguished_name = admin_distinguished_name
+req_extensions = admin_extensions
+prompt = no
+
+[ admin_extensions ]
+basicConstraints = CA:FALSE
+extendedKeyUsage = clientAuth
+keyUsage = critical, digitalSignature, keyEncipherment
+nsCertType = client
+nsComment = admin Certificate
+# subjectAltName = ""
+subjectKeyIdentifier = hash
+
+[admin_distinguished_name]
+countryName = DE
+stateOrProvinceName = Berlin
+localityName = Berlin
+0.organizationName = system:masters
+commonName = kubernetes-admin
+
+##################### node-1 #####################
+
+[ node-1]
+distinguished_name = node-1_distinguished_name
+req_extensions = node-1_extensions
+prompt = no
+
+[ node-1_extensions ]
+basicConstraints = CA:FALSE
+extendedKeyUsage     = clientAuth, serverAuth
+keyUsage = critical, digitalSignature, keyEncipherment
+nsCertType = client
+nsComment = node-1 Certificate
+subjectAltName       = IP:10.0.0.36, IP:127.0.0.1, IP:13.94.187.150, DNS: worker-node-1
+subjectKeyIdentifier = hash
+
+[node-1_distinguished_name]
+countryName = DE
+stateOrProvinceName = Berlin
+localityName = Berlin
+0.organizationName = system:nodes
+commonName = system:node:worker-node-1
+
+##################### node-2 #####################
+
+[ node-2]
+distinguished_name = node-2_distinguished_name
+req_extensions = node-2_extensions
+prompt = no
+
+[ node-2_extensions ]
+basicConstraints = CA:FALSE
+extendedKeyUsage     = clientAuth, serverAuth
+keyUsage = critical, digitalSignature, keyEncipherment
+nsCertType = client
+nsComment = node-2 Certificate
+subjectAltName       = IP:10.0.0.37, IP:127.0.0.1, IP:13.94.187.128, DNS: worker-node-2
+subjectKeyIdentifier = hash
+
+[node-2_distinguished_name]
+countryName = DE
+stateOrProvinceName = Berlin
+localityName = Berlin
+0.organizationName = system:nodes
+commonName = system:node:worker-node-2
+
+##################### controller-manager #####################
+
+[ controller-manager ]
+distinguished_name = controller-manager_distinguished_name
+req_extensions = controller-manager_extensions
+prompt = no
+
+[ controller-manager_extensions ]
+basicConstraints = CA:FALSE
+extendedKeyUsage     = clientAuth, serverAuth
+keyUsage = critical, digitalSignature, keyEncipherment
+nsCertType = client
+nsComment = controller-manager Certificate
+subjectAltName       = DNS:kube-proxy, IP:127.0.0.1
+subjectKeyIdentifier = hash
+
+[controller-manager_distinguished_name]
+countryName = DE
+stateOrProvinceName = Berlin
+localityName = Berlin
+0.organizationName = system:kube-controller-manager
+commonName = system:kube-controller-manager
+
+##################### scheduler #####################
+
+[ scheduler ]
+distinguished_name = scheduler_distinguished_name
+req_extensions = scheduler_extensions
+prompt = no
+
+[ scheduler_extensions ]
+basicConstraints = CA:FALSE
+extendedKeyUsage     = clientAuth, serverAuth
+keyUsage = critical, digitalSignature, keyEncipherment
+nsCertType = client
+nsComment = scheduler Certificate
+subjectAltName       = DNS:kube-scheduler, IP:127.0.0.1
+subjectKeyIdentifier = hash
+
+[scheduler_distinguished_name]
+countryName = DE
+stateOrProvinceName = Berlin
+localityName = Berlin
+0.organizationName = system:kube-scheduler
+commonName = system:kube-scheduler

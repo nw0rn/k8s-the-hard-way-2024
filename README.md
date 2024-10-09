@@ -2,8 +2,6 @@
 
 Inspired by Kelsey Hightower's [k8s-the-hard-way](https://github.com/kelseyhightower/kubernetes-the-hard-way) 
 
-YouTube Video: [here](https://www.youtube.com/watch?v=KE7tlO5d1Es)
-
 ## Useful links: 
 
 ### Certificates
